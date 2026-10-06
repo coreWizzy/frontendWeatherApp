@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkyPulse - Next-Gen Weather Intelligence Dashboard</title>
+  <meta name="description" content="Ultra-luxurious, state-of-the-art meteorological dashboard featuring real-time Doppler radar, 3D weather dynamics, 7-day extended forecasts, and atmospheric telemetry.">
+
+  <!-- Google Fonts: Space Grotesk & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5.3.3 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <!-- Bootstrap Icons 1.11.3 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Custom Luxury Glassmorphism Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+  <!-- ========================================================================
+       TOP NAVIGATION BAR
+       ======================================================================== -->
+  <header class="sticky-top glass-panel border-bottom border-white-10 py-2 py-md-3 px-3 px-md-4" style="z-index: 1040; background-color: rgba(7, 11, 20, 0.85);">
+    <div class="container-fluid max-w-1720 px-0 d-flex align-items-center justify-content-between gap-3">
+      
+      <!-- Brand Logo -->
+      <a href="#" class="d-flex align-items-center gap-3 text-decoration-none" id="brand-link">
+        <div class="rounded-3 p-1 shadow-sm d-flex align-items-center justify-content-center" style="width: 42px; height: 42px; background: linear-gradient(135deg, #00d2ff, #0056d6);">
+          <img src="assets/logo.svg" alt="SkyPulse Logo" width="34" height="34" class="img-fluid">
+        </div>
+        <div>
+          <span class="fs-4 brand-title">SkyPulse</span>
+          <span class="d-none d-sm-inline-block ms-2 badge rounded-pill bg-info-subtle text-info border border-info-subtle small fw-bold px-2 py-1">PRO AI</span>
+        </div>
+      </a>
+
+      <!-- Search Bar & Autocomplete -->
+      <div class="d-none d-md-flex flex-grow-1 max-w-650 mx-3 align-items-center gap-3">
+        <form id="search-form" class="glass-input-wrapper position-relative flex-grow-1">
+          <i class="bi bi-search position-absolute top-50 translate-middle-y text-secondary ms-3" style="font-size: 0.95rem;"></i>
+          <input type="search" id="city-search-input" class="glass-input" placeholder="Search city, coordinates or airport..." autocomplete="off" value="Minsk, Belarus" aria-label="Search city or airport">
+          <button type="submit" class="position-absolute top-50 end-0 translate-middle-y me-2 btn btn-sm btn-info text-dark fw-bold rounded-pill px-3" style="font-size: 0.75rem; z-index: 4;">Search</button>
+          
+          <!-- Dropdown Results -->
+          <div id="search-dropdown" class="search-results-dropdown shadow-lg"></div>
+        </form>
+
+        <!-- Quick Switch City Pills -->
+        <div class="d-none d-xl-flex align-items-center gap-1">
+          <button class="city-pill" data-city="tokyo">Tokyo</button>
+          <button class="city-pill" data-city="london">London</button>
+          <button class="city-pill" data-city="newyork">New York</button>
+          <button class="city-pill" data-city="paris">Paris</button>
+          <button class="city-pill" data-city="dubai">Dubai</button>
+        </div>
+      </div>
+
+      <!-- Controls & Live Status -->
+      <div class="d-flex align-items-center gap-2 gap-sm-3">
+        
+        <!-- Live Clock Indicator -->
+        <div class="d-none d-lg-flex flex-column text-end pe-3 border-end border-white border-opacity-10">
+          <span id="live-clock-time" class="fw-bold text-white small">11:00 AM</span>
+          <span id="live-clock-date" class="text-info fw-semibold" style="font-size: 0.72rem;">Monday, 17 May</span>
+        </div>
+
+        <!-- Ambient Sound Synthesizer Button -->
+        <button id="btn-audio-toggle" class="glass-btn glass-btn-icon" title="Toggle Ambient Weather Sound" aria-label="Toggle weather sound">
+          <i class="bi bi-volume-mute text-secondary"></i>
+        </button>
+
+        <!-- Metric Switcher (°C / °F) -->
+        <div class="unit-switcher">
+          <button id="unit-btn-c" class="unit-btn active">°C</button>
+          <button id="unit-btn-f" class="unit-btn">°F</button>
+        </div>
+
+        <!-- Mobile Simulator Preview Trigger -->
+        <button class="glass-btn d-none d-sm-inline-flex" data-bs-toggle="modal" data-bs-target="#mobileSimulatorModal" title="Preview Mobile App Interface">
+          <i class="bi bi-phone text-info"></i>
+          <span class="d-none d-xl-inline">Mobile App</span>
+        </button>
+
+        <!-- Weather Notifications Dropdown -->
+        <div class="dropdown">
+          <button class="glass-btn glass-btn-icon position-relative" data-bs-toggle="dropdown" aria-expanded="false" title="Active Alerts" aria-label="View notifications">
+            <span class="position-absolute top-0 start-100 translate-middle p-1 bg-info border border-dark rounded-circle">
+              <span class="visually-hidden">New alerts</span>
+            </span>
+            <i class="bi bi-bell-fill text-white"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end notif-dropdown-menu mt-2 text-white">
+            <div class="d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom border-white border-opacity-10">
+              <span class="fw-bold small text-info"><i class="bi bi-lightning-charge-fill me-1"></i>Active Telemetry Alerts</span>
+              <span class="badge bg-danger-subtle text-danger small">1 Active</span>
+            </div>
+            <div class="p-2 rounded-3 bg-white bg-opacity-5 mb-2">
+              <div class="fw-bold small text-warning">Severe Thunderstorm Watch</div>
+              <p class="text-secondary mb-0" style="font-size: 0.75rem;">Heavy precipitation and cloud-to-ground lightning forecasted within current sector.</p>
+            </div>
+            <div class="text-center pt-1">
+              <a href="#" class="text-info text-decoration-none small" style="font-size: 0.75rem;">Acknowledge All Warnings</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile Avatar -->
+        <div class="rounded-3 p-0.5 shadow-sm" style="width: 38px; height: 38px; background: linear-gradient(135deg, #6366f1, #a855f7);">
+          <div class="w-100 h-100 rounded-3 bg-dark d-flex align-items-center justify-content-center text-white fw-bold small">
+            SP
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       MAIN DASHBOARD GRID
+       ======================================================================== -->
+  <main class="flex-grow-1 container-fluid max-w-1720 py-4 px-3 px-md-4">
+    
+    <!-- Top Row: Hero Card + Hourly Dynamics + 7-Day Extended Outlook -->
+    <div class="row g-4 align-items-stretch mb-4">
+      
+      <!-- ====================================================================
+           COLUMN 1: PRESENT CONDITION HERO CARD (Left)
+           ==================================================================== -->
+      <div class="col-12 col-lg-5 col-xl-4 col-xxl-3 d-flex flex-column">
+        <section class="hero-weather-card rounded-4 p-4 p-md-4 d-flex flex-column justify-content-between h-100 shadow-lg" aria-label="Current Weather Condition">
+          
+          <!-- Background Atmospheric Glows -->
+          <div class="position-absolute top-0 start-0 translate-middle rounded-circle bg-info opacity-25" style="width: 260px; height: 260px; filter: blur(70px); pointer-events: none;"></div>
+          <div class="position-absolute bottom-0 end-0 translate-middle rounded-circle bg-primary opacity-30" style="width: 260px; height: 260px; filter: blur(80px); pointer-events: none;"></div>
+
+          <!-- Hero Top Bar -->
+          <div class="position-relative z-1 d-flex align-items-center justify-content-between mb-3">
+            <button class="glass-btn glass-btn-icon" aria-label="Menu">
+              <i class="bi bi-grid-fill text-white"></i>
+            </button>
+
+            <!-- Location & Updating Pill -->
+            <div class="text-center">
+              <div class="d-flex align-items-center justify-content-center gap-1 fw-bold fs-5 text-white">
+                <i class="bi bi-geo-alt-fill text-info"></i>
+                <span id="weatherCity">Minsk</span>
+              </div>
+              <div class="d-inline-flex align-items-center gap-1.5 px-2.5 py-0.5 mt-1 rounded-pill bg-white bg-opacity-20 border border-white border-opacity-25" style="font-size: 0.7rem;">
+                <span class="rounded-circle bg-warning animate-pulse" style="width: 6px; height: 6px;"></span>
+                <span class="fw-semibold text-white">Live Updating</span>
+              </div>
+            </div>
+
+            <button class="glass-btn glass-btn-icon" aria-label="Options">
+              <i class="bi bi-three-dots text-white"></i>
+            </button>
+          </div>
+
+          <!-- 3D Claymorphic Weather Centerpiece -->
+          <div class="position-relative z-1 my-auto py-3 d-flex flex-column align-items-center justify-content-center">
+            
+            <!-- Procedural 3D Weather Icon Container -->
+            <div class="position-relative animated-cloud-hero d-flex align-items-center justify-content-center" style="width: 220px; height: 160px;">
+              <!-- Soft ambient glow -->
+              <div class="position-absolute rounded-circle bg-warning opacity-25" style="width: 160px; height: 120px; filter: blur(35px);"></div>
+              
+              <!-- Multi-tier Clay Cloud SVG -->
+              <svg class="img-fluid" viewBox="0 0 200 150" style="width: 190px; filter: drop-shadow(0 20px 25px rgba(0, 25, 80, 0.45));" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="cloudGrad" x1="50" y1="20" x2="160" y2="140" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#FFFFFF"/>
+                    <stop offset="0.6" stop-color="#E8F1FC"/>
+                    <stop offset="1" stop-color="#BDD4F5"/>
+                  </linearGradient>
+                  <linearGradient id="cloudSpecular" x1="90" y1="25" x2="120" y2="70" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#FFFFFF" stop-opacity="0.95"/>
+                    <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <!-- Cloud Silhouette -->
+                <path d="M55 110C40 110 25 98 25 80C25 64 36 52 50 50C54 30 72 15 95 15C122 15 142 33 145 55C158 55 175 66 175 82C175 99 160 110 145 110H55Z" fill="url(#cloudGrad)"/>
+                <!-- Gloss Specular Highlight -->
+                <ellipse cx="95" cy="45" rx="35" ry="18" fill="url(#cloudSpecular)"/>
+                <ellipse cx="140" cy="72" rx="18" ry="10" fill="url(#cloudSpecular)"/>
+              </svg>
+
+              <!-- 3D Lightning Bolts -->
+              <div class="position-absolute bottom-0 d-flex align-items-center justify-content-center gap-2">
+                <!-- Left Bolt -->
+                <svg class="lightning-glow" style="width: 24px; height: 38px; transform: rotate(-12deg);" viewBox="0 0 32 48" fill="none">
+                  <polygon fill="#FFD000" points="18,0 4,26 16,26 10,48 28,18 16,18"></polygon>
+                </svg>
+                <!-- Center Primary Bolt -->
+                <svg class="lightning-glow" style="width: 44px; height: 60px; filter: drop-shadow(0 4px 12px rgba(255, 200, 0, 0.9));" viewBox="0 0 32 48" fill="none">
+                  <polygon fill="#FFE144" stroke="#FFAE00" stroke-width="1.5" points="18,0 3,25 17,25 10,48 30,17 16,17"></polygon>
+                </svg>
+                <!-- Right Bolt -->
+                <svg class="lightning-glow" style="width: 24px; height: 38px; transform: rotate(12deg);" viewBox="0 0 32 48" fill="none">
+                  <polygon fill="#FFD000" points="18,0 4,26 16,26 10,48 28,18 16,18"></polygon>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Temperature & Condition -->
+            <div class="text-center mt-3">
+              <div class="d-inline-flex align-items-start">
+                <span id="weatherTemp" class="display-1 fw-bold text-white lh-1">21</span>
+                <span id="hero-temp-unit" class="fs-2 text-info opacity-90 fw-light ms-1">°C</span>
+              </div>
+              <h2 id="hero-condition-text" class="h3 fw-bold text-white mt-1 mb-0">Thunderstorm</h2>
+              <p id="weatherFeels_like" class="text-white text-opacity-75 small mb-0 mt-1">Monday, 17 May • Feels like 20°</p>
+              <p id="locationID" class="text-info text-opacity-75 small mb-0 mt-1" style="font-size: 0.75rem;"></p>
+            </div>
+
+          </div>
+
+          <!-- Hero Metrics Bar (Wind, Humidity, Rain Chance) -->
+          <div class="position-relative z-1 pt-3 border-top border-white border-opacity-20 row g-2 text-center">
+            <!-- Wind -->
+            <div class="col-4">
+              <div class="p-2 rounded-3 bg-white bg-opacity-10 border border-white border-opacity-10 d-flex flex-column align-items-center">
+                <i class="bi bi-wind text-info fs-5 mb-1"></i>
+                <span id="hero-wind-val" class="fw-bold small text-white">13 km/h</span>
+                <span class="text-white text-opacity-75" style="font-size: 0.68rem;">Wind</span>
+              </div>
+            </div>
+            <!-- Humidity -->
+            <div class="col-4">
+              <div class="p-2 rounded-3 bg-white bg-opacity-10 border border-white border-opacity-10 d-flex flex-column align-items-center">
+                <i class="bi bi-droplet-half text-info fs-5 mb-1"></i>
+                <span id="weatherHumidity" class="fw-bold small text-white">24%</span>
+                <span class="text-white text-opacity-75" style="font-size: 0.68rem;">Humidity</span>
+              </div>
+            </div>
+            <!-- Rain Chance -->
+            <div class="col-4">
+              <div class="p-2 rounded-3 bg-white bg-opacity-10 border border-white border-opacity-10 d-flex flex-column align-items-center">
+                <i class="bi bi-cloud-rain-heavy text-info fs-5 mb-1"></i>
+                <span id="hero-rain-val" class="fw-bold small text-white">87%</span>
+                <span class="text-white text-opacity-75" style="font-size: 0.68rem;">Rain Chance</span>
+              </div>
+            </div>
+          </div>
+
+        </section>
+      </div>
+
+      <!-- ====================================================================
+           COLUMN 2: HOURLY DYNAMICS & ATMOSPHERIC MATRIX (Center)
+           ==================================================================== -->
+      <div class="col-12 col-lg-7 col-xl-7 col-xxl-5 d-flex flex-column gap-4">
+        
+        <!-- Hourly Forecast & Wave Chart Card -->
+        <section class="glass-panel glass-panel-hover rounded-4 p-4 flex-grow-1 d-flex flex-column justify-content-between" aria-label="Today Hourly Forecast">
+          
+          <!-- Header -->
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <div>
+              <span class="text-info text-uppercase fw-bold" style="font-size: 0.72rem; letter-spacing: 0.08em;">Timeline</span>
+              <h3 class="h5 fw-bold text-white mb-0">Today's Hourly Forecast</h3>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge bg-white bg-opacity-10 border border-white border-opacity-10 text-light py-1.5 px-2.5 small">24-Hours</span>
+              <button class="glass-btn py-1 px-2.5 small text-info" onclick="showToast('Timeline Insights', 'Stable barometric conditions expected post-15:00.')">
+                Details <i class="bi bi-chevron-right ms-0.5"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Dynamic SVG Wave Temperature & Rain Chart -->
+          <div class="position-relative w-100 my-2" style="height: 120px;">
+            <svg id="temp-wave-svg" class="w-100 h-100 overflow-visible" preserveAspectRatio="none" viewBox="0 0 500 120">
+              <defs>
+                <linearGradient id="curveGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#00d2ff" stop-opacity="0.45"/>
+                  <stop offset="100%" stop-color="#00d2ff" stop-opacity="0.0"/>
+                </linearGradient>
+                <linearGradient id="lineStroke" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#0084ff"/>
+                  <stop offset="50%" stop-color="#00f0ff"/>
+                  <stop offset="100%" stop-color="#3b82f6"/>
+                </linearGradient>
+              </defs>
+              <!-- Filled Area Under Curve -->
+              <path d="M 0,90 Q 70,55 125,75 T 250,30 T 375,80 T 500,95 L 500,120 L 0,120 Z" fill="url(#curveGradient)"/>
+              <!-- Bright Stroke Line -->
+              <path d="M 0,90 Q 70,55 125,75 T 250,30 T 375,80 T 500,95" fill="none" stroke="url(#lineStroke)" stroke-linecap="round" stroke-width="3"/>
+              <!-- Active Highlight Pinpoint (Interactive) -->
+              <circle id="wave-active-point" cx="125" cy="51" r="6" fill="#ffd600" style="filter: drop-shadow(0 0 8px #ffd600); transition: all 0.35s ease;"/>
+              <circle id="wave-active-ping" cx="125" cy="51" r="11" fill="none" stroke="#ffd600" stroke-width="1.5" opacity="0.6" style="transition: all 0.35s ease;"/>
+            </svg>
+          </div>
+
+          <!-- Interactive Hourly Cards Grid -->
+          <div id="hourly-cards-container" class="row row-cols-3 row-cols-sm-6 g-2 pt-2">
+            <!-- Populated via JavaScript dynamically -->
+          </div>
+
+        </section>
+
+        <!-- Comprehensive Health & Atmospheric Matrix (3 cards) -->
+        <section class="row g-3" aria-label="Atmospheric Telemetry">
+          <!-- UV Index Card -->
+          <div class="col-4">
+            <div class="atm-metric-card h-100">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-secondary small fw-medium">UV Index</span>
+                <span class="rounded-circle bg-warning" style="width: 8px; height: 8px;"></span>
+              </div>
+              <div class="my-2">
+                <span id="atm-uv-val" class="h3 fw-bold text-white mb-0">3</span>
+                <span id="atm-uv-level" class="small fw-semibold text-warning ms-1">Moderate</span>
+              </div>
+              <div class="custom-progress">
+                <div id="atm-uv-bar" class="custom-progress-bar bg-warning" style="width: 35%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Air Quality Card -->
+          <div class="col-4">
+            <div class="atm-metric-card h-100">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-secondary small fw-medium">Air Quality</span>
+                <span class="rounded-circle bg-success" style="width: 8px; height: 8px;"></span>
+              </div>
+              <div class="my-2">
+                <span id="atm-aqi-val" class="h3 fw-bold text-white mb-0">42</span>
+                <span id="atm-aqi-level" class="small fw-semibold text-success ms-1">AQI • Good</span>
+              </div>
+              <div class="custom-progress">
+                <div id="atm-aqi-bar" class="custom-progress-bar bg-success" style="width: 25%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Barometer Pressure Card -->
+          <div class="col-4">
+            <div class="atm-metric-card h-100">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-secondary small fw-medium">Barometer</span>
+                <span class="rounded-circle bg-info" style="width: 8px; height: 8px;"></span>
+              </div>
+              <div class="my-2">
+                <span id="atm-barometer-val" class="h3 fw-bold text-white mb-0">1014</span>
+                <span class="small fw-semibold text-secondary ms-1">hPa</span>
+              </div>
+              <div class="custom-progress">
+                <div id="atm-barometer-bar" class="custom-progress-bar bg-info" style="width: 60%;"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- ====================================================================
+           COLUMN 3: 7-DAYS EXTENDED OUTLOOK (Right)
+           ==================================================================== -->
+      <div class="col-12 col-xl-12 col-xxl-4 d-flex flex-column">
+        <section class="glass-panel glass-panel-hover rounded-4 p-4 d-flex flex-column justify-content-between h-100" aria-label="7 Days Extended Forecast">
+          
+          <!-- Header -->
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <div class="d-flex align-items-center gap-2">
+              <button class="glass-btn glass-btn-icon" style="width: 32px; height: 32px;" aria-label="Previous day">
+                <i class="bi bi-chevron-left text-light small"></i>
+              </button>
+              <div class="d-flex align-items-center gap-2 text-white fw-bold">
+                <i class="bi bi-calendar3 text-info"></i>
+                <span>7 days forecast</span>
+              </div>
+            </div>
+            <button class="glass-btn glass-btn-icon" style="width: 32px; height: 32px;" aria-label="Forecast options">
+              <i class="bi bi-three-dots text-secondary"></i>
+            </button>
+          </div>
+
+          <!-- Tomorrow Highlight Pill Card -->
+          <div class="tomorrow-pill-card rounded-4 p-3 mb-3 text-white shadow-sm">
+            <div class="d-flex align-items-center justify-content-between">
+              
+              <!-- Sun & Cloud Illustration -->
+              <div class="position-relative d-flex align-items-center" style="width: 80px; height: 50px;">
+                <div class="rounded-circle bg-warning position-absolute" style="width: 30px; height: 30px; top: 2px; left: 6px; box-shadow: 0 0 12px #f59e0b;"></div>
+                <svg class="position-relative z-1" viewBox="0 0 200 150" style="width: 75px;" fill="none">
+                  <path d="M55 110C40 110 25 98 25 80C25 64 36 52 50 50C54 30 72 15 95 15C122 15 142 33 145 55C158 55 175 66 175 82C175 99 160 110 145 110H55Z" fill="#F8FAFC"/>
+                  <line stroke="#38BDF8" stroke-linecap="round" stroke-width="5" x1="70" x2="70" y1="120" y2="135"/>
+                  <line stroke="#38BDF8" stroke-linecap="round" stroke-width="5" x1="100" x2="100" y1="120" y2="140"/>
+                  <line stroke="#38BDF8" stroke-linecap="round" stroke-width="5" x1="130" x2="130" y1="120" y2="135"/>
+                </svg>
+              </div>
+
+              <!-- Temperature Summary -->
+              <div class="text-end">
+                <span class="text-uppercase text-white-50 fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.05em;">Tomorrow</span>
+                <div class="fs-3 fw-bold text-white lh-1">
+                  <span id="tomorrow-high-val">20</span>
+                  <span id="tomorrow-low-val" class="fs-6 fw-light text-white-50">/17°</span>
+                </div>
+                <p id="tomorrow-condition" class="small text-info-subtle mb-0 mt-0.5">Rainy - Cloudy</p>
+              </div>
+
+            </div>
+
+            <!-- Tomorrow Secondary Metrics -->
+            <div class="row g-1 mt-2 pt-2 border-top border-white border-opacity-20 text-center">
+              <div class="col-4">
+                <span id="tomorrow-wind" class="d-block fw-bold small text-white">9 km/h</span>
+                <span class="text-white-50" style="font-size: 0.68rem;">Wind</span>
+              </div>
+              <div class="col-4">
+                <span id="tomorrow-humidity" class="d-block fw-bold small text-white">31%</span>
+                <span class="text-white-50" style="font-size: 0.68rem;">Humidity</span>
+              </div>
+              <div class="col-4">
+                <span id="tomorrow-rain" class="d-block fw-bold small text-white">93%</span>
+                <span class="text-white-50" style="font-size: 0.68rem;">Chance of rain</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- 7-Days List Mon to Sun -->
+          <div id="seven-days-list-container" class="d-flex flex-column gap-1">
+            <!-- Populated via JavaScript dynamically -->
+          </div>
+
+        </section>
+      </div>
+
+    </div>
+
+    <!-- Bottom Row: Live Interactive Doppler Radar Preview & Celestial Sun Path -->
+    <div class="row g-4 align-items-stretch">
+      
+      <!-- ====================================================================
+           BOTTOM LEFT: LIVE DOPPLER RADAR SECTION
+           ==================================================================== -->
+      <div class="col-12 col-lg-8">
+        <section class="glass-panel glass-panel-hover rounded-4 p-4 h-100 d-flex flex-column justify-content-between position-relative overflow-hidden" aria-label="Interactive Doppler Radar">
+          
+          <!-- Radar Header & Layers -->
+          <div class="position-relative z-1 d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+            <div>
+              <div class="d-flex align-items-center gap-2">
+                <span class="rounded-circle bg-info animate-pulse" style="width: 8px; height: 8px;"></span>
+                <h3 class="h5 fw-bold text-white mb-0">Live Doppler Precipitation &amp; Wind Radar</h3>
+              </div>
+              <p id="radar-sector-text" class="text-secondary small mb-0 mt-0.5">Eastern Europe Sector • High Resolution Stream</p>
+            </div>
+
+            <!-- Layer Switchers -->
+            <div class="d-flex align-items-center gap-1.5 flex-wrap">
+              <button class="radar-layer-btn active" data-layer="precipitation">Precipitation</button>
+              <button class="radar-layer-btn" data-layer="wind">Wind Stream</button>
+              <button class="radar-layer-btn" data-layer="temperature">Temperature Heatmap</button>
+            </div>
+          </div>
+
+          <!-- Interactive Animated Radar Screen -->
+          <div class="radar-display-container">
+            
+            <!-- Grid Lines Background -->
+            <div class="radar-grid-bg"></div>
+
+            <!-- Concentric Range Rings -->
+            <div class="radar-ring radar-ring-1"></div>
+            <div class="radar-ring radar-ring-2"></div>
+            <div class="radar-ring radar-ring-3"></div>
+            <div class="radar-ring radar-ring-4"></div>
+
+            <!-- Rotating Radar Sweep Cone -->
+            <div id="radar-cone" class="radar-sweep radar-sweep-cone">
+              <div class="radar-sweep-fill"></div>
+            </div>
+
+            <!-- Simulated Storm Thermal Clouds -->
+            <div id="radar-cell-1" class="radar-storm-cell radar-cell-primary"></div>
+            <div id="radar-cell-2" class="radar-storm-cell radar-cell-secondary"></div>
+
+            <!-- City Target Pinpoint Marker -->
+            <div class="radar-pinpoint">
+              <div class="radar-pin-dot"></div>
+              <div id="radar-pinpoint-label" class="radar-pin-label">Minsk (Storm Center)</div>
+            </div>
+
+            <!-- Floating Radar Controls -->
+            <div class="position-absolute top-0 end-0 m-3 d-flex align-items-center gap-1.5 z-2">
+              <button id="radar-btn-play" class="glass-btn glass-btn-icon" style="width: 32px; height: 32px;" title="Pause Radar">
+                <i class="bi bi-pause-fill"></i>
+              </button>
+              <button id="radar-btn-speed" class="glass-btn px-2 py-1 small fw-bold" style="font-size: 0.75rem;" title="Toggle Sweep Speed">
+                1x
+              </button>
+            </div>
+
+            <!-- Color Scale Legend Badge -->
+            <div class="position-absolute bottom-0 end-0 m-3 px-3 py-1.5 rounded-3 glass-panel border border-white border-opacity-10 d-flex align-items-center gap-2 small text-secondary z-2" style="font-size: 0.72rem;">
+              <span>Light</span>
+              <div class="rounded-pill" style="width: 80px; height: 6px; background: linear-gradient(90deg, #38bdf8, #facc15, #ef4444);"></div>
+              <span>Severe</span>
+            </div>
+
+          </div>
+
+        </section>
+      </div>
+
+      <!-- ====================================================================
+           BOTTOM RIGHT: SUN & MOON CELESTIAL ARC + AI ADVISORY
+           ==================================================================== -->
+      <div class="col-12 col-lg-4 d-flex flex-column gap-4">
+        
+        <!-- Celestial Arc Card -->
+        <section class="glass-panel glass-panel-hover rounded-4 p-4 flex-grow-1 d-flex flex-column justify-content-between" aria-label="Sun and Moon Position">
+          
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="text-secondary text-uppercase fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.05em;">Sun &amp; Moon Position</span>
+            <span id="sun-daylight-text" class="text-warning fw-semibold small">14h 33m Daylight</span>
+          </div>
+
+          <!-- Arc Visualization -->
+          <div class="position-relative d-flex align-items-center justify-content-center my-2" style="height: 110px;">
+            <svg class="w-100 h-100 overflow-visible" viewBox="0 0 300 110">
+              <defs>
+                <linearGradient id="goldenArc" x1="0%" y1="100%" x2="50%" y2="0%">
+                  <stop offset="0%" stop-color="#ff7a00"/>
+                  <stop offset="100%" stop-color="#ffd000"/>
+                </linearGradient>
+              </defs>
+              <!-- Dotted Sun Horizon Arc -->
+              <path d="M 20,100 A 130,90 0 0,1 280,100" fill="none" stroke="rgba(255, 255, 255, 0.15)" stroke-dasharray="6,6" stroke-width="2"/>
+              <!-- Traveled Golden Arc Segment -->
+              <path id="sun-path-segment" d="M 20,100 A 130,90 0 0,1 125,28" fill="none" stroke="url(#goldenArc)" stroke-width="3.5"/>
+              <!-- Sun Position Indicator (Active glow) -->
+              <circle id="sun-indicator-dot" cx="125" cy="28" r="7" fill="#ffe600" style="filter: drop-shadow(0 0 10px #ffe600);"/>
+              <!-- Base Horizon Line -->
+              <line x1="10" y1="100" x2="290" y2="100" stroke="rgba(255, 255, 255, 0.2)" stroke-width="1.5"/>
+            </svg>
+          </div>
+
+          <!-- Sunrise & Sunset Breakdown -->
+          <div class="d-flex align-items-center justify-content-between pt-2 border-top border-white border-opacity-10">
+            <!-- Sunrise -->
+            <div class="d-flex align-items-center gap-2">
+              <div class="rounded-3 p-1 bg-warning bg-opacity-10 border border-warning border-opacity-25 d-flex align-items-center justify-content-center text-warning" style="width: 28px; height: 28px;">
+                <i class="bi bi-arrow-up-short fs-5"></i>
+              </div>
+              <div>
+                <span class="text-secondary d-block" style="font-size: 0.68rem;">Sunrise</span>
+                <span id="sun-sunrise-time" class="fw-bold text-white small">06:12 AM</span>
+              </div>
+            </div>
+            <!-- Sunset -->
+            <div class="d-flex align-items-center gap-2">
+              <div class="text-end">
+                <span class="text-secondary d-block" style="font-size: 0.68rem;">Sunset</span>
+                <span id="sun-sunset-time" class="fw-bold text-white small">08:45 PM</span>
+              </div>
+              <div class="rounded-3 p-1 bg-danger bg-opacity-10 border border-danger border-opacity-25 d-flex align-items-center justify-content-center text-danger" style="width: 28px; height: 28px;">
+                <i class="bi bi-arrow-down-short fs-5"></i>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- AI Lifestyle & Travel Insights Banner -->
+        <section class="glass-panel rounded-4 p-3 border-info border-opacity-25" style="background: linear-gradient(135deg, rgba(8, 25, 60, 0.6) 0%, rgba(11, 19, 37, 0.8) 100%);" aria-label="Severe Weather Advisory">
+          <div class="d-flex align-items-start gap-3">
+            <div class="rounded-3 bg-info bg-opacity-20 text-info d-flex align-items-center justify-content-center flex-shrink-0" style="width: 38px; height: 38px;">
+              <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+            </div>
+            <div>
+              <h4 id="ai-alert-title" class="fw-bold text-white small mb-1">Severe Thunderstorm Alert</h4>
+              <p id="ai-alert-text" class="text-light text-opacity-80 small mb-0 lh-sm">Heavy rainfall and lightning strikes projected between 11:00 AM and 02:00 PM. Keep an umbrella ready and avoid open elevated zones.</p>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ========================================================================
+       FOOTER
+       ======================================================================== -->
+  <footer class="mt-auto border-top border-white border-opacity-10 py-4 px-3 px-md-4 text-secondary small" style="background-color: rgba(6, 10, 18, 0.95);">
+    <div class="container-fluid max-w-1720 d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 text-center text-md-start">
+      <div>
+        <p class="mb-0">© 2026 SkyPulse Technologies Inc. Engineered with HTML5, CSS3 &amp; Bootstrap 5.3.</p>
+      </div>
+      <div class="d-flex align-items-center gap-3 gap-md-4">
+        <a href="#" class="text-secondary text-decoration-none text-hover-info" onclick="showToast('Doppler Network', '142 active Doppler stations connected globally.'); return false;">Doppler Stations</a>
+        <a href="#" class="text-secondary text-decoration-none text-hover-info" onclick="showToast('Satellite Uplink', 'Geostationary feed active on Ka-band.'); return false;">Satellite Feeds</a>
+        <a href="#" class="text-secondary text-decoration-none text-hover-info" onclick="showToast('API Documentation', 'REST & WebSocket API operational.'); return false;">API Documentation</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================================================
+       MOBILE PHONE SIMULATOR MODAL (Exact reproduction of mobile.html)
+       ======================================================================== -->
+  <div class="modal fade mobile-simulator-modal" id="mobileSimulatorModal" tabindex="-1" aria-labelledby="mobileSimulatorLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+      <div class="modal-content">
+        
+        <!-- Phone Frame Container -->
+        <div class="mobile-phone-frame">
+          
+          <!-- iOS Status Bar & Dynamic Island -->
+          <div class="pt-3 px-4 d-flex justify-content-between align-items-center text-white small position-relative z-3">
+            <span id="mobile-status-time" class="fw-bold">9:41</span>
+            <div class="mobile-dynamic-island"></div>
+            <div class="d-flex align-items-center gap-1.5 text-white">
+              <i class="bi bi-reception-4" style="font-size: 0.8rem;"></i>
+              <i class="bi bi-wifi" style="font-size: 0.8rem;"></i>
+              <i class="bi bi-battery-full fs-6"></i>
+            </div>
+          </div>
+
+          <!-- Screen Views Area -->
+          <div class="position-relative flex-grow-1 overflow-hidden">
+            
+            <!-- VIEW 1: TODAY CURRENT WEATHER (DEFAULT) -->
+            <div id="m-view-today" class="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-between p-3" style="transition: all 0.35s ease;">
+              
+              <!-- Blue Weather Hero Card inside phone -->
+              <div class="hero-weather-card rounded-5 p-4 d-flex flex-column justify-content-between flex-grow-1 shadow-lg position-relative overflow-hidden" style="max-height: 520px;">
+                
+                <!-- Top Nav in Card -->
+                <div class="d-flex align-items-center justify-content-between position-relative z-1">
+                  <button class="glass-btn glass-btn-icon rounded-circle" style="width: 36px; height: 36px;" aria-label="Mobile menu">
+                    <i class="bi bi-grid-fill text-white small"></i>
+                  </button>
+                  <div class="text-center">
+                    <div class="d-flex align-items-center gap-1 text-white fw-bold">
+                      <i class="bi bi-geo-alt-fill text-info"></i>
+                      <span id="m-city-name">Minsk</span>
+                    </div>
+                    <div class="badge rounded-pill bg-dark bg-opacity-25 border border-white border-opacity-25 small" style="font-size: 0.65rem;">
+                      <span class="rounded-circle bg-warning d-inline-block me-1" style="width: 5px; height: 5px;"></span>Updating
+                    </div>
+                  </div>
+                  <button class="glass-btn glass-btn-icon rounded-circle" style="width: 36px; height: 36px;" aria-label="Mobile options">
+                    <i class="bi bi-three-dots text-white small"></i>
+                  </button>
+                </div>
+
+                <!-- 3D Cloud Centerpiece in Phone -->
+                <div class="position-relative my-auto d-flex flex-column align-items-center justify-content-center py-2">
+                  <div class="position-relative d-flex align-items-center justify-content-center" style="width: 170px; height: 120px;">
+                    <div class="position-absolute rounded-circle bg-white opacity-25" style="width: 120px; height: 80px; filter: blur(25px);"></div>
+                    <div class="clay-cloud-base" style="width: 130px; height: 60px;"></div>
+                    <!-- Lightning Bolt -->
+                    <svg class="position-absolute bottom-0 lightning-glow" style="width: 38px; height: 50px;" viewBox="0 0 32 48" fill="none">
+                      <polygon fill="#FFE144" stroke="#FFAE00" stroke-width="1.5" points="18,0 3,25 17,25 10,48 30,17 16,17"></polygon>
+                    </svg>
+                  </div>
+
+                  <!-- Mobile Temp -->
+                  <div class="text-center mt-2">
+                    <div class="display-3 fw-bold text-white lh-1">
+                      <span id="m-hero-temp">21</span><span class="fs-2 fw-light">°</span>
+                    </div>
+                    <h5 id="m-hero-condition" class="fw-bold text-white mb-0 mt-1">Thunderstorm</h5>
+                    <p class="text-white-50 small mb-0">Monday, 17 May</p>
+                  </div>
+                </div>
+
+                <!-- Metrics Bar -->
+                <div class="row g-1 pt-2 border-top border-white border-opacity-20 text-center position-relative z-1">
+                  <div class="col-4">
+                    <i class="bi bi-wind text-info small"></i>
+                    <span id="m-hero-wind" class="d-block fw-bold small text-white">13 km/h</span>
+                    <span class="text-white-50" style="font-size: 0.65rem;">Wind</span>
+                  </div>
+                  <div class="col-4">
+                    <i class="bi bi-droplet-half text-info small"></i>
+                    <span id="m-hero-humidity" class="d-block fw-bold small text-white">24%</span>
+                    <span class="text-white-50" style="font-size: 0.65rem;">Humidity</span>
+                  </div>
+                  <div class="col-4">
+                    <i class="bi bi-cloud-rain text-info small"></i>
+                    <span id="m-hero-rain" class="d-block fw-bold small text-white">87%</span>
+                    <span class="text-white-50" style="font-size: 0.65rem;">Rain</span>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Hourly Mini Bar & Button to 7 Days -->
+              <div class="pt-3 px-1">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <span class="fw-bold text-white small">Today</span>
+                  <button id="m-btn-goto-7days" class="btn btn-link text-info p-0 text-decoration-none small fw-semibold">
+                    7 days <i class="bi bi-chevron-right ms-0.5"></i>
+                  </button>
+                </div>
+                <div class="row g-2">
+                  <div class="col-3">
+                    <div class="p-2 rounded-3 bg-dark text-center border border-white border-opacity-10">
+                      <span class="d-block small fw-bold">23°</span>
+                      <i class="bi bi-sun text-warning small my-1 d-block"></i>
+                      <span class="text-secondary" style="font-size: 0.65rem;">10:00</span>
+                    </div>
+                  </div>
+                  <div class="col-3">
+                    <div class="p-2 rounded-3 text-center" style="background: linear-gradient(180deg, #00d2ff, #0084ff); box-shadow: 0 4px 12px rgba(0,132,255,0.6);">
+                      <span class="d-block small fw-bold text-white">21°</span>
+                      <i class="bi bi-lightning text-white small my-1 d-block"></i>
+                      <span class="text-white fw-bold" style="font-size: 0.65rem;">11:00</span>
+                    </div>
+                  </div>
+                  <div class="col-3">
+                    <div class="p-2 rounded-3 bg-dark text-center border border-white border-opacity-10">
+                      <span class="d-block small fw-bold">22°</span>
+                      <i class="bi bi-cloud-rain text-info small my-1 d-block"></i>
+                      <span class="text-secondary" style="font-size: 0.65rem;">12:00</span>
+                    </div>
+                  </div>
+                  <div class="col-3">
+                    <div class="p-2 rounded-3 bg-dark text-center border border-white border-opacity-10">
+                      <span class="d-block small fw-bold">19°</span>
+                      <i class="bi bi-moon-stars text-secondary small my-1 d-block"></i>
+                      <span class="text-secondary" style="font-size: 0.65rem;">01:00</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- VIEW 2: 7 DAYS EXTENDED FORECAST SCREEN (SLIDE) -->
+            <div id="m-view-7days" class="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-between p-3" style="opacity: 0; pointer-events: none; transform: translateX(100%); transition: all 0.35s ease;">
+              
+              <!-- 7 Days Header Card in Phone -->
+              <div class="hero-weather-card rounded-5 p-4 shadow-lg mb-3">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                  <button id="m-btn-back-today" class="glass-btn glass-btn-icon rounded-circle" style="width: 36px; height: 36px;" aria-label="Back to today">
+                    <i class="bi bi-chevron-left text-white small"></i>
+                  </button>
+                  <div class="d-flex align-items-center gap-1.5 text-white fw-bold">
+                    <i class="bi bi-calendar3"></i>
+                    <span>7 days</span>
+                  </div>
+                  <button class="glass-btn glass-btn-icon rounded-circle" style="width: 36px; height: 36px;" aria-label="Options">
+                    <i class="bi bi-three-dots text-white small"></i>
+                  </button>
+                </div>
+
+                <!-- Tomorrow Feature in Phone -->
+                <div class="d-flex align-items-center justify-content-between">
+                  <div class="rounded-circle bg-warning p-2 text-dark shadow-sm">
+                    <i class="bi bi-cloud-sun fs-4"></i>
+                  </div>
+                  <div class="text-end">
+                    <span class="text-uppercase text-white-50 small" style="font-size: 0.65rem;">Tomorrow</span>
+                    <div id="m-tomorrow-temp" class="h4 fw-bold text-white mb-0">20 <span class="fs-6 opacity-75">/17°</span></div>
+                    <span id="m-tomorrow-cond" class="small text-info-subtle">Rainy - Cloudy</span>
+                  </div>
+                </div>
+
+                <div class="row g-1 mt-2 pt-2 border-top border-white border-opacity-20 text-center">
+                  <div class="col-4">
+                    <span id="m-tomorrow-wind" class="d-block fw-bold small text-white">9 km/h</span>
+                    <span class="text-white-50" style="font-size: 0.65rem;">Wind</span>
+                  </div>
+                  <div class="col-4">
+                    <span id="m-tomorrow-humid" class="d-block fw-bold small text-white">31%</span>
+                    <span class="text-white-50" style="font-size: 0.65rem;">Humidity</span>
+                  </div>
+                  <div class="col-4">
+                    <span id="m-tomorrow-rain" class="d-block fw-bold small text-white">93%</span>
+                    <span class="text-white-50" style="font-size: 0.65rem;">Rain</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 7 Days List in Phone -->
+              <div id="m-7days-list" class="flex-grow-1 overflow-auto d-flex flex-column gap-1 pe-1">
+                <!-- Dynamically populated -->
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Bottom Close Simulator Button -->
+          <div class="p-2 text-center border-top border-white border-opacity-10 bg-dark">
+            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Close Mobile Simulator</button>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications Container -->
+  <div id="toast-container" class="toast-container-custom"></div>
+
+  <!-- Bootstrap 5.3.3 Bundle JS with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+  <!-- SkyPulse Core Application Logic -->
+  <script src="js/app.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
